@@ -12,9 +12,11 @@
 namespace League\CommonMark\Ext\Autolink;
 
 use League\CommonMark\Event\DocumentParsedEvent;
-use League\CommonMark\Inline\Element\Link;
-use League\CommonMark\Inline\Element\Text;
+use League\CommonMark\Extension\Autolink\UrlAutolinkProcessor as CoreProcessor;
 
+/**
+ * @deprecated The league/commonmark-ext-autolink extension is now deprecated. All functionality has been moved into league/commonmark 1.3+, so use that instead.
+ */
 final class UrlAutolinkProcessor
 {
     // RegEx adapted from https://github.com/symfony/symfony/blob/4.2/src/Symfony/Component/Validator/Constraints/UrlValidator.php
@@ -41,11 +43,12 @@ final class UrlAutolinkProcessor
             (?:\# (?:[\pL\pN\-._\~!$&\'()*+,;=:@/?]|%%[0-9A-Fa-f]{2})* )?   # a fragment (optional)
         )~ixu';
 
-    private $finalRegex;
+    private $coreProcessor;
 
     public function __construct(array $allowedProtocols = ['http', 'https', 'ftp'])
     {
-        $this->finalRegex = \sprintf(self::REGEX, \implode('|', $allowedProtocols));
+        @trigger_error(sprintf('league/commonmark-ext-autolink is deprecated; use %s from league/commonmark 1.3+ instead', CoreProcessor::class), E_USER_DEPRECATED);
+        $this->coreProcessor = new CoreProcessor($allowedProtocols);
     }
 
     /**
@@ -55,95 +58,6 @@ final class UrlAutolinkProcessor
      */
     public function __invoke(DocumentParsedEvent $e)
     {
-        $walker = $e->getDocument()->walker();
-
-        while ($event = $walker->next()) {
-            $node = $event->getNode();
-            if ($node instanceof Text && !($node->parent() instanceof Link)) {
-                self::processAutolinks($node, $this->finalRegex);
-            }
-        }
-    }
-
-    private static function processAutolinks(Text $node, $regex)
-    {
-        $contents = \preg_split($regex, $node->getContent(), -1, PREG_SPLIT_DELIM_CAPTURE);
-
-        if (\count($contents) === 1) {
-            return;
-        }
-
-        $leftovers = '';
-        foreach ($contents as $i => $content) {
-            // Even-indexed elements are things before/after the URLs
-            if ($i % 2 === 0) {
-                // Insert any left-over characters here as well
-                $text = $leftovers . $content;
-                if ($text !== '') {
-                    $node->insertBefore(new Text($leftovers . $content));
-                }
-
-                $leftovers = '';
-                continue;
-            }
-
-            $leftovers = '';
-
-            // Does the URL end with punctuation that should be stripped?
-            if (\preg_match('/(.+)([?!.,:*_~]+)$/', $content, $matches)) {
-                // Add the punctuation later
-                $content = $matches[1];
-                $leftovers = $matches[2];
-            }
-
-            // Does the URL end with something that looks like an entity reference?
-            if (\preg_match('/(.+)(&[A-Za-z0-9]+;)$/', $content, $matches)) {
-                $content = $matches[1];
-                $leftovers = $matches[2] . $leftovers;
-            }
-
-            // Does the URL need its closing paren chopped off?
-            if (\substr($content, -1) === ')' && self::hasMoreCloserParensThanOpeners($content)) {
-                $content = \substr($content, 0, -1);
-                $leftovers = ')' . $leftovers;
-            }
-
-            self::addLink($node, $content);
-        }
-
-        $node->detach();
-    }
-
-    private static function addLink(Text $node, $url)
-    {
-        // Auto-prefix 'http://' onto 'www' URLs
-        if (\substr($url, 0, 4) === 'www.') {
-            $node->insertBefore(new Link('http://' . $url, $url));
-
-            return;
-        }
-
-        $node->insertBefore(new Link($url, $url));
-    }
-
-    /**
-     * @param string $content
-     *
-     * @return bool
-     */
-    private static function hasMoreCloserParensThanOpeners($content)
-    {
-        // Scan the entire autolink for the total number of parentheses.
-        // If there is a greater number of closing parentheses than opening ones,
-        // we don’t consider the last character part of the autolink, in order to
-        // facilitate including an autolink inside a parenthesis.
-        \preg_match_all('/[()]/', $content, $matches);
-
-        $charCount = ['(' => 0, ')' => 0];
-        foreach ($matches[0] as $char) {
-            $charCount[$char]++;
-        }
-
-        return $charCount[')'] > $charCount['('];
+        $this->coreProcessor->__invoke($e);
     }
 }

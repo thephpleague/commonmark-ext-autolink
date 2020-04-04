@@ -12,14 +12,24 @@
 namespace League\CommonMark\Ext\Autolink;
 
 use League\CommonMark\ConfigurableEnvironmentInterface;
-use League\CommonMark\Event\DocumentParsedEvent;
+use League\CommonMark\Extension\Autolink\AutolinkExtension as CoreExtension;
 use League\CommonMark\Extension\ExtensionInterface;
 
+/**
+ * @deprecated The league/commonmark-ext-autolink extension is now deprecated. All functionality has been moved into league/commonmark 1.3+, so use that instead.
+ */
 final class AutolinkExtension implements ExtensionInterface
 {
+    private $coreExtension;
+
+    public function __construct()
+    {
+        $this->coreExtension = new CoreExtension();
+        @trigger_error(sprintf('league/commonmark-ext-autolink is deprecated; use %s from league/commonmark 1.3+ instead', CoreExtension::class), E_USER_DEPRECATED);
+    }
+
     public function register(ConfigurableEnvironmentInterface $environment)
     {
-        $environment->addEventListener(DocumentParsedEvent::class, new EmailAutolinkProcessor());
-        $environment->addEventListener(DocumentParsedEvent::class, new UrlAutolinkProcessor());
+        $this->coreExtension->register($environment);
     }
 }

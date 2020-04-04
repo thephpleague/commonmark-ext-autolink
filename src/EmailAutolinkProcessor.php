@@ -12,12 +12,22 @@
 namespace League\CommonMark\Ext\Autolink;
 
 use League\CommonMark\Event\DocumentParsedEvent;
-use League\CommonMark\Inline\Element\Link;
-use League\CommonMark\Inline\Element\Text;
+use League\CommonMark\Extension\Autolink\EmailAutolinkProcessor as CoreProcessor;
 
+/**
+ * @deprecated The league/commonmark-ext-autolink extension is now deprecated. All functionality has been moved into league/commonmark 1.3+, so use that instead.
+ */
 final class EmailAutolinkProcessor
 {
     const REGEX = '/([A-Za-z0-9.\-_+]+@[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_.]+)/';
+
+    private $coreProcessor;
+
+    public function __construct()
+    {
+        @trigger_error(sprintf('league/commonmark-ext-autolink is deprecated; use %s from league/commonmark 1.3+ instead', CoreProcessor::class), E_USER_DEPRECATED);
+        $this->coreProcessor = new CoreProcessor();
+    }
 
     /**
      * @param DocumentParsedEvent $e
@@ -26,53 +36,6 @@ final class EmailAutolinkProcessor
      */
     public function __invoke(DocumentParsedEvent $e)
     {
-        $walker = $e->getDocument()->walker();
-
-        while ($event = $walker->next()) {
-            $node = $event->getNode();
-            if ($node instanceof Text && !($node->parent() instanceof Link)) {
-                self::processAutolinks($node);
-            }
-        }
-    }
-
-    private static function processAutolinks(Text $node)
-    {
-        $contents = \preg_split(self::REGEX, $node->getContent(), -1, PREG_SPLIT_DELIM_CAPTURE);
-
-        if (\count($contents) === 1) {
-            return;
-        }
-
-        $leftovers = '';
-        foreach ($contents as $i => $content) {
-            if ($i % 2 === 0) {
-                $text = $leftovers . $content;
-                if ($text !== '') {
-                    $node->insertBefore(new Text($leftovers . $content));
-                }
-
-                $leftovers = '';
-                continue;
-            }
-
-            // Does the URL end with punctuation that should be stripped?
-            if (\substr($content, -1) === '.') {
-                // Add the punctuation later
-                $content = \substr($content, 0, -1);
-                $leftovers = '.';
-            }
-
-            // The last character cannot be - or _
-            if (\in_array(\substr($content, -1), ['-', '_'])) {
-                $node->insertBefore(new Text($content . $leftovers));
-                $leftovers = '';
-                continue;
-            }
-
-            $node->insertBefore(new Link('mailto:' . $content, $content));
-        }
-
-        $node->detach();
+        $this->coreProcessor->__invoke($e);
     }
 }
