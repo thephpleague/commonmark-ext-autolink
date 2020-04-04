@@ -7,6 +7,12 @@
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
+## DEPRECATED
+
+**This extension has been deprecated**.  All of its functionality now exists in [`league/commonmark`][link-league-commonmark] 1.3+ under the `League\CommonMark\Extension\Autolink` namespace, so you should upgrade to that version and use that bundled extension instead of this one.
+
+## Overview
+
 This extension adds [GFM-style autolinking][link-gfm-spec-autolinking] to the [`league/commonmark` Markdown parser for PHP][link-league-commonmark].  It automatically link URLs and email addresses even when the CommonMark `<...>` autolink syntax is not used.
 
 It also provides a parser to autolink `@mentions` to Twitter, Github, or any custom service you wish, though this is disabled by default.

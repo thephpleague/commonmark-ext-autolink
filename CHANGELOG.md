@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][unreleased]
 
+## [1.1.0] - 2020-04-01
+
+### Deprecated
+
+**This extension has been deprecated**.  All of its functionality now exists in league/commonmark 1.3+ under the `League\CommonMark\Extension\Autolink` namespace.
+
 ## [1.0.1] - 2020-01-13
 
 ### Fixed
@@ -75,7 +81,8 @@ This release brings the email and URL autolink processors into alignment with th
 
 Initial release!
 
-[unreleased]: https://github.com/thephpleague/commonmark-ext-autolink/compare/v1.0.1...HEAD
+[unreleased]: https://github.com/thephpleague/commonmark-ext-autolink/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/thephpleague/commonmark-ext-autolink/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/thephpleague/commonmark-ext-autolink/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/thephpleague/commonmark-ext-autolink/compare/v1.0.0-beta3...v1.0.0
 [1.0.0-beta2]: https://github.com/thephpleague/commonmark-ext-autolink/compare/v1.0.0-beta2...v1.0.0-beta3
